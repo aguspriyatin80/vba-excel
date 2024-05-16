@@ -13,12 +13,44 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Dim MyFilePath As String
+Dim FilePath() As String
 Dim MyFileName As String
 Dim MyFileNameWOExt As String
 Dim FileFold As String
 Dim TotPhoto As Long
+Sub TampilkanCekList()
+'On Error GoTo Salah
+On Error Resume Next
+If FileFold = Empty Then
+    Exit Sub
+End If
+'If Me.SelPhoto.Caption = "SELECT MENU" Then
+    'Me.SelPhoto.Caption = "DESELECT MENU"
+    'BersihkanCekList
+    'For ChkBtn = 1 To TotPhoto
+     '   Set ChkBox = Me.Controls.Add("Forms.CheckBox.1")
+      '      ChkBox.Name = "CheckBox" & ChkBtn
+       '     ChkBox.Width = Me.Controls("Image" & ChkBtn).Width
+        '    ChkBox.Left = Me.Controls("Image" & ChkBtn).Left
+         '   ChkBox.Top = Me.Controls("Image" & ChkBtn).Top + Me("Image" & ChkBtn).Height - 10
+          '  frmGallery.Controls("CheckBox" & ChkBtn).BackColor = vbRed
+           ' frmGallery.Controls("CheckBox" & ChkBtn).BackStyle = 1
+            'ControlName = frmGallery.Controls("CheckBox" & ChkBtn).Name & " - " & frmGallery.Controls("Image" & ChkBtn).Name
+            'MsgBox ControlName
+    'Next ChkBtn
+'Else
+    'Me.SelPhoto.Caption = "SELECT MENU"
+    For ChkBtn = 1 To Me.Controls.Count
+        Me.Controls.Remove ("CheckBox" & ChkBtn)
+    Next ChkBtn
+'End If
+End Sub
 
+Sub BersihkanCekList()
+For ChkBtn = 0 To TotPhoto - 1
+    Me.Controls.Remove ("CheckBox" & ChkBtn)
+Next ChkBtn
+End Sub
 Private Sub InsertImgFood()
 TotPhoto = 0
 Set ObjFSO = CreateObject("Scripting.FileSystemObject")
@@ -62,16 +94,12 @@ TopPos = 100
             Else
                 Me.ScrollBars = fmScrollBarsNone
             End If
-    
     MyFilePath = FilePath(InsImg - 1)
     MyFileName = ObjFSO.GetFileName(MyFilePath)
-    'Me.ComboBox1.AddItem MyFileName
     MyFileNameWOExt = Left(MyFileName, InStr(MyFileName, ".") - 1)
     Me.ComboBox1.AddItem MyFileNameWOExt
-    
     Next InsImg
 End Sub
-
 Private Sub InsertImgBeverage()
 TotPhoto = 0
 Set ObjFSO = CreateObject("Scripting.FileSystemObject")
@@ -115,17 +143,13 @@ TopPos = 100
             Else
                 Me.ScrollBars = fmScrollBarsNone
             End If
-    
     MyFilePath = FilePath(InsImg - 1)
     MyFileName = ObjFSO.GetFileName(MyFilePath)
     'Me.ComboBox1.AddItem MyFileName
     MyFileNameWOExt = Left(MyFileName, InStr(MyFileName, ".") - 1)
     Me.ComboBox1.AddItem MyFileNameWOExt
-    
     Next InsImg
 End Sub
-
-
 Private Sub InsertImg()
 TotPhoto = 0
 Set ObjFSO = CreateObject("Scripting.FileSystemObject")
@@ -150,11 +174,15 @@ LeftPos = 10
 TopPos = 100
     For InsImg = 1 To TotPhoto
         Set Img = frmGallery.Controls.Add("Forms.Image.1")
+            Img.BackColor = vbRed
+            
             With Img
+                .Name = "Image" & InsImg
                 .Left = LeftPos
                 .Top = TopPos
                 .Picture = LoadPicture(FilePath(InsImg - 1))
                 .PictureSizeMode = 1
+                
                 LeftPos = LeftPos + .Width + 5
                 Pic = Pic + 1
             End With
@@ -169,29 +197,27 @@ TopPos = 100
             Else
                 Me.ScrollBars = fmScrollBarsNone
             End If
-    
     MyFilePath = FilePath(InsImg - 1)
     MyFileName = ObjFSO.GetFileName(MyFilePath)
     'Me.ComboBox1.AddItem MyFileName
     MyFileNameWOExt = Left(MyFileName, InStr(MyFileName, ".") - 1)
     Me.ComboBox1.AddItem MyFileNameWOExt
-    
     Next InsImg
 End Sub
-
-Private Sub CheckBox1_Click()
-If Me.CheckBox1.Value = True Then
+Private Sub chkOrder_Click()
+If Me.chkOrder.Value = True Then
     Me.txtQty.Enabled = True
     Me.txtQty.Value = 1
     Me.cmdPlus.Enabled = True
+    Me.cmdProses.Visible = True
 Else
     Me.cmdMinus.Enabled = False
     Me.txtQty.Enabled = False
     Me.txtQty.Value = 0
     Me.cmdPlus.Enabled = False
+    Me.cmdProses.Visible = False
 End If
 End Sub
-
 Private Sub cmdMinus_Click()
 If Me.txtQty.Value > 1 Then
     Me.txtQty.Value = Me.txtQty - 1
@@ -199,33 +225,65 @@ Else
     Me.cmdMinus.Enabled = False
 End If
 End Sub
-
 Private Sub cmdPlus_Click()
 Me.cmdMinus.Enabled = True
 Me.txtQty.Value = Me.txtQty + 1
 End Sub
-
+Private Sub cmdProses_Click()
+MsgBox Me.ComboBox1.Value & " sudah masuk dalam pesanan "
+SelFolder_Click
+End Sub
 Private Sub ComboBox1_Change()
 Dim imagePath As String, imageName As String
 imagePath = "C:\Users\agus\Documents\ALL\"
 imageName = Me.ComboBox1.Value & ".jpg"
-
 On Error Resume Next
-TotPhoto = Me.Controls.Count
 For RemImg = 0 To TotPhoto
     Me.Controls.Remove ("Image" & RemImg)
+    Me.Controls.Remove ("CheckBox" & RemImg)
 Next RemImg
-Me.Image1.Visible = True
-Me.CheckBox1.Visible = True
+Me.ImgMenu.Visible = True
 Me.cmdMinus.Visible = True
 Me.txtQty.Visible = True
 Me.cmdPlus.Visible = True
-Me.Image1.Picture = LoadPicture(imagePath & imageName)
+Me.cmdProses.Visible = True
+Me.ImgMenu.Picture = LoadPicture(imagePath & imageName)
 Me.ScrollBars = fmScrollBarsNone
+Me.SelPhoto.Caption = "SELECT MENU"
+If Me.ComboBox1.Value = "" Then
+    Me.SelPhoto.Enabled = True
+Else
+    Me.SelPhoto.Enabled = False
+End If
 End Sub
 
-Private Sub Image1_BeforeDragOver(ByVal Cancel As MSForms.ReturnBoolean, ByVal Data As MSForms.DataObject, ByVal X As Single, ByVal Y As Single, ByVal DragState As MSForms.fmDragState, ByVal Effect As MSForms.ReturnEffect, ByVal Shift As Integer)
+Private Sub DelBtn_Click()
+'TotPhoto = Me.Controls("Forms.Image.1").Count
+On Error Resume Next
 
+If TotPhoto > 0 Then
+
+    For ChkBtn = 0 To TotPhoto
+        If Me("CheckBox" & ChkBtn).Value = True Then
+            
+            Me.Controls.Remove ("CheckBox" & ChkBtn)
+            Me.Controls.Remove ("Image" & ChkBtn)
+            Kill FilePath(ChkBtn - 1)
+           ' MsgBox FilePath(ChkBtn - 1)
+        End If
+    Next ChkBtn
+Else
+    MsgBox "Foto tidak ada"
+End If
+Set ObjFSO = CreateObject("Scripting.FileSystemObject")
+myString = ObjFSO.getFolder(FileFold)
+If ContainsSubString("FOOD", myString) = True Then
+    SelFood_Click
+ElseIf ContainsSubString("BEVERAGE", myString) = True Then
+    SelBeverage_Click
+Else
+    MsgBox "Tidak ada photo"
+End If
 End Sub
 
 Private Sub SelBeverage_Click()
@@ -238,13 +296,25 @@ Private Sub SelBeverage_Click()
 'remove remove existing controls
 On Error Resume Next
 TotPhoto = Me.Controls.Count
-For RemImg = 0 To TotPhoto
+If TotPhoto = 0 Then Exit Sub
+For RemImg = 1 To TotPhoto
     Me.Controls.Remove ("Image" & RemImg)
 Next RemImg
 Me.ComboBox1.Clear
-Me.Image1.Visible = False
+Me.ImgMenu.Visible = False
+Me.txtQty.Visible = False
+Me.cmdMinus.Visible = False
+Me.cmdPlus.Visible = False
+Me.cmdProses.Visible = False
+BersihkanCekList
 InsertImgBeverage
+Me.SelPhoto.Caption = "SELECT MENU"
+For ChkBtn = 1 To Me.Controls.Count
+    Me.Controls.Remove ("CheckBox" & ChkBtn)
+Next ChkBtn
+SelPhoto_Click
 NoFolder:
+
 End Sub
 
 Private Sub SelFolder_Click()
@@ -257,17 +327,24 @@ Private Sub SelFolder_Click()
 'remove remove existing controls
 On Error Resume Next
 TotPhoto = Me.Controls.Count
-For RemImg = 0 To TotPhoto
+For RemImg = 1 To TotPhoto
     Me.Controls.Remove ("Image" & RemImg)
 Next RemImg
 Me.ComboBox1.Clear
-Me.Image1.Visible = False
-Me.CheckBox1.Visible = False
+Me.ImgMenu.Visible = False
+'Me.chkOrder.Visible = False
 Me.txtQty.Visible = False
 Me.cmdMinus.Visible = False
 Me.cmdPlus.Visible = False
+Me.cmdProses.Visible = False
 InsertImg
+Me.SelPhoto.Caption = "SELECT MENU"
+For ChkBtn = 1 To Me.Controls.Count
+    Me.Controls.Remove ("CheckBox" & ChkBtn)
+Next ChkBtn
+SelPhoto_Click
 NoFolder:
+
 End Sub
 
 Private Sub SelFood_Click()
@@ -280,19 +357,63 @@ Private Sub SelFood_Click()
 'remove remove existing controls
 On Error Resume Next
 TotPhoto = Me.Controls.Count
-For RemImg = 0 To TotPhoto
+For RemImg = 1 To TotPhoto
     Me.Controls.Remove ("Image" & RemImg)
 Next RemImg
 Me.ComboBox1.Clear
-Me.Image1.Visible = False
-Me.CheckBox1.Visible = False
+Me.ImgMenu.Visible = False
 Me.txtQty.Visible = False
 Me.cmdMinus.Visible = False
 Me.cmdPlus.Visible = False
+Me.cmdProses.Visible = False
+BersihkanCekList
 InsertImgFood
+Me.SelPhoto.Caption = "SELECT MENU"
+For ChkBtn = 1 To Me.Controls.Count
+    Me.Controls.Remove ("CheckBox" & ChkBtn)
+Next ChkBtn
+SelPhoto_Click
 NoFolder:
+
 End Sub
 
+Private Sub SelPhoto_Click()
+'On Error GoTo Salah
+On Error Resume Next
+'If FileFold = Empty Then
+'    Exit Sub
+'End If
+
+    If Me.SelPhoto.Caption = "SELECT MENU" Then
+        Me.SelPhoto.Caption = "DESELECT MENU"
+        BersihkanCekList
+        If TotPhoto = 0 Then
+        MsgBox "Belum ada data"
+        Exit Sub
+        End If
+        
+        For ChkBtn = 1 To TotPhoto
+            Set ChkBox = Me.Controls.Add("Forms.CheckBox.1")
+                ChkBox.Name = "CheckBox" & ChkBtn
+                ChkBox.Width = Me.Controls("Image" & ChkBtn).Width
+                ChkBox.Height = Me.Controls("Image" & ChkBtn).Height
+                ChkBox.Left = Me.Controls("Image" & ChkBtn).Left
+                ChkBox.BackStyle = 1
+                ChkBox.BackColor = red
+                'ChkBox.Top = Me.Controls("Image" & ChkBtn).Top + Me("Image" & ChkBtn).Height - 10
+                ChkBox.Top = Me.Controls("Image" & ChkBtn).Top
+                'frmGallery.Controls("CheckBox" & ChkBtn).BackColor = vbRed
+                frmGallery.Controls("CheckBox" & ChkBtn).BackStyle = 0
+                'ControlName = frmGallery.Controls("CheckBox" & ChkBtn).Name & " - " & frmGallery.Controls("Image" & ChkBtn).Name
+                'MsgBox ControlName
+        Next ChkBtn
+    Else
+        Me.SelPhoto.Caption = "SELECT MENU"
+        For ChkBtn = 1 To Me.Controls.Count
+            Me.Controls.Remove ("CheckBox" & ChkBtn)
+        Next ChkBtn
+    End If
+End Sub
 Private Sub UserForm_Initialize()
 'Set Filedig = Application.FileDialog(msoFileDialogFolderPicker)
 'With Filedig
@@ -303,13 +424,13 @@ Private Sub UserForm_Initialize()
 'remove remove existing controls
 On Error Resume Next
 TotPhoto = Me.Controls.Count
-For RemImg = 0 To TotPhoto
+For RemImg = 1 To TotPhoto
     Me.Controls.Remove ("Image" & RemImg)
 Next RemImg
 Me.ComboBox1.Clear
 InsertImg
-Me.Image1.Visible = False
-Me.CheckBox1.Visible = False
+Me.ImgMenu.Visible = False
+'Me.chkOrder.Visible = False
 Me.txtQty.Visible = False
 Me.txtQty.Value = 0
 Me.cmdMinus.Visible = False
@@ -318,8 +439,7 @@ Me.cmdPlus.Visible = False
 Me.txtQty.Enabled = False
 Me.cmdMinus.Enabled = False
 Me.cmdPlus.Enabled = False
+Me.cmdProses.Visible = False
+SelPhoto_Click
 NoFolder:
 End Sub
-
-
-
