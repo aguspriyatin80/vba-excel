@@ -18,6 +18,7 @@ Dim MyFileName As String
 Dim MyFileNameWOExt As String
 Dim FileFold As String
 Dim TotPhoto As Long
+
 Sub TampilkanCekList()
 'On Error GoTo Salah
 On Error Resume Next
@@ -218,6 +219,12 @@ Else
     Me.cmdProses.Visible = False
 End If
 End Sub
+
+Private Sub cmdBackToMenu_Click()
+SelFolder_Click
+
+End Sub
+
 Private Sub cmdMinus_Click()
 If Me.txtQty.Value > 1 Then
     Me.txtQty.Value = Me.txtQty - 1
@@ -235,7 +242,7 @@ SelFolder_Click
 End Sub
 Private Sub ComboBox1_Change()
 Dim imagePath As String, imageName As String
-imagePath = "C:\Users\agus\Documents\ALL\"
+imagePath = ThisWorkbook.Path & "\ALL\"
 imageName = Me.ComboBox1.Value & ".jpg"
 On Error Resume Next
 For RemImg = 0 To TotPhoto
@@ -246,7 +253,14 @@ Me.ImgMenu.Visible = True
 Me.cmdMinus.Visible = True
 Me.txtQty.Visible = True
 Me.cmdPlus.Visible = True
+
+Me.cmdMinus.Enabled = True
+Me.txtQty.Enabled = True
+Me.cmdPlus.Enabled = True
+
+
 Me.cmdProses.Visible = True
+Me.cmdBackToMenu.Visible = True
 Me.ImgMenu.Picture = LoadPicture(imagePath & imageName)
 Me.ScrollBars = fmScrollBarsNone
 Me.SelPhoto.Caption = "SELECT MENU"
@@ -260,30 +274,52 @@ End Sub
 Private Sub DelBtn_Click()
 'TotPhoto = Me.Controls("Forms.Image.1").Count
 On Error Resume Next
-
+Dim valsum As Integer
+sumTrue = 0
+  
 If TotPhoto > 0 Then
-
+    
     For ChkBtn = 0 To TotPhoto
+        sumTrue = sumTrue + IIf(Me("CheckBox" & ChkBtn).Value = True, 1, 0)
         If Me("CheckBox" & ChkBtn).Value = True Then
-            
             Me.Controls.Remove ("CheckBox" & ChkBtn)
             Me.Controls.Remove ("Image" & ChkBtn)
             Kill FilePath(ChkBtn - 1)
-           ' MsgBox FilePath(ChkBtn - 1)
         End If
     Next ChkBtn
-Else
-    MsgBox "Foto tidak ada"
+    If sumTrue = 0 Then
+        MsgBox "Foto belum dipilih"
+    End If
 End If
 Set ObjFSO = CreateObject("Scripting.FileSystemObject")
 myString = ObjFSO.getFolder(FileFold)
 If ContainsSubString("FOOD", myString) = True Then
-    SelFood_Click
+    If TotPhoto <= 1 Then
+        Exit Sub
+    ElseIf TotPhoto > 1 And sumTrue > 1 Then
+        Exit Sub
+    Else
+        SelFood_Click
+    End If
 ElseIf ContainsSubString("BEVERAGE", myString) = True Then
-    SelBeverage_Click
-Else
-    MsgBox "Tidak ada photo"
+    If TotPhoto <= 1 Then
+        Exit Sub
+    ElseIf TotPhoto > 1 And sumTrue > 1 Then
+        Exit Sub
+    Else
+        SelBeverage_Click
+    End If
+    
+ElseIf ContainsSubString("ALL", myString) = True Then
+    If TotPhoto <= 1 Then
+        Exit Sub
+    ElseIf TotPhoto > 1 And sumTrue > 1 Then
+        Exit Sub
+    Else
+        SelFolder_Click
+    End If
 End If
+
 End Sub
 
 Private Sub SelBeverage_Click()
@@ -337,6 +373,7 @@ Me.txtQty.Visible = False
 Me.cmdMinus.Visible = False
 Me.cmdPlus.Visible = False
 Me.cmdProses.Visible = False
+Me.cmdBackToMenu.Visible = False
 InsertImg
 Me.SelPhoto.Caption = "SELECT MENU"
 For ChkBtn = 1 To Me.Controls.Count
@@ -435,7 +472,7 @@ Me.txtQty.Visible = False
 Me.txtQty.Value = 0
 Me.cmdMinus.Visible = False
 Me.cmdPlus.Visible = False
-
+Me.cmdBackToMenu.Visible = False
 Me.txtQty.Enabled = False
 Me.cmdMinus.Enabled = False
 Me.cmdPlus.Enabled = False
